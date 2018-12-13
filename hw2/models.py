@@ -36,12 +36,12 @@ class MLP(Block):
 
         # TODO: Build the MLP architecture as described.
         # ====== YOUR CODE: ======
-        blocks.append(Linear(in_features, hidden_features[0]))
-        for i in range(len(hidden_features) - 1):
-            blocks.append(ReLU())
-            blocks.append(Linear(hidden_features[i], hidden_features[i + 1]))
-        blocks.append(ReLU())
-        blocks.append(Linear(hidden_features[-1], num_classes))
+        blocks[0]=Linear(in_features, hidden_features[0])
+        for i in range(0, len(hidden_features)-1):
+            blocks[2*i] = Linear(hidden_features[i], hidden_features[i+1])
+            blocks[2*i+1] = ReLU()
+
+
         # ========================
 
         self.sequence = Sequential(*blocks)
@@ -99,7 +99,9 @@ class ConvClassifier(nn.Module):
         # Pooling to reduce dimensions.
         # ====== YOUR CODE: ======
         raise NotImplementedError()
-
+        layers.append(nn.Conv3d(, , 5))
+        layers.append(nn.ReLU())
+        layers.appen()
         # ========================
         seq = nn.Sequential(*layers)
         return seq
@@ -128,15 +130,15 @@ class ConvClassifier(nn.Module):
         return out
 
 
-# class YourCodeNet(ConvClassifier):
-#     def __init__(self, in_size, out_classes, filters, pool_every, hidden_dims):
-#         super().__init__(in_size, out_classes, filters, pool_every, hidden_dims)
-#
-#     # TODO: Change whatever you want about the ConvClassifier to try to
-#     # improve it's results on CIFAR-10.
-#     # For example, add batchnorm, dropout, skip connections, change conv
-#     # filter sizes etc.
-#     # ====== YOUR CODE: ======
-#     raise NotImplementedError()
-#     # ========================
-#
+class YourCodeNet(ConvClassifier):
+    def __init__(self, in_size, out_classes, filters, pool_every, hidden_dims):
+        super().__init__(in_size, out_classes, filters, pool_every, hidden_dims)
+
+    # TODO: Change whatever you want about the ConvClassifier to try to
+    # improve it's results on CIFAR-10.
+    # For example, add batchnorm, dropout, skip connections, change conv
+    # filter sizes etc.
+    # ====== YOUR CODE: ======
+    raise NotImplementedError()
+    # ========================
+
