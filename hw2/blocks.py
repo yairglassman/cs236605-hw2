@@ -148,7 +148,8 @@ class ReLU(Block):
 
         # TODO: Implement the ReLU operation.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        out = x
+        out.data[out < 0] = 0
         # ========================
 
         self.grad_cache['x'] = x
@@ -163,7 +164,8 @@ class ReLU(Block):
 
         # TODO: Implement gradient w.r.t. the input x
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        dx = dout.clone()
+        dx[x < 0] = 0
         # ========================
 
         return dx
