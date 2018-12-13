@@ -36,7 +36,12 @@ class MLP(Block):
 
         # TODO: Build the MLP architecture as described.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        blocks.append(Linear(in_features, hidden_features[0]))
+        for i in range(len(hidden_features) - 1):
+            blocks.append(ReLU())
+            blocks.append(Linear(hidden_features[i], hidden_features[i + 1]))
+        blocks.append(ReLU())
+        blocks.append(Linear(hidden_features[-1], num_classes))
         # ========================
 
         self.sequence = Sequential(*blocks)
@@ -123,15 +128,15 @@ class ConvClassifier(nn.Module):
         return out
 
 
-class YourCodeNet(ConvClassifier):
-    def __init__(self, in_size, out_classes, filters, pool_every, hidden_dims):
-        super().__init__(in_size, out_classes, filters, pool_every, hidden_dims)
-
-    # TODO: Change whatever you want about the ConvClassifier to try to
-    # improve it's results on CIFAR-10.
-    # For example, add batchnorm, dropout, skip connections, change conv
-    # filter sizes etc.
-    # ====== YOUR CODE: ======
-    raise NotImplementedError()
-    # ========================
-
+# class YourCodeNet(ConvClassifier):
+#     def __init__(self, in_size, out_classes, filters, pool_every, hidden_dims):
+#         super().__init__(in_size, out_classes, filters, pool_every, hidden_dims)
+#
+#     # TODO: Change whatever you want about the ConvClassifier to try to
+#     # improve it's results on CIFAR-10.
+#     # For example, add batchnorm, dropout, skip connections, change conv
+#     # filter sizes etc.
+#     # ====== YOUR CODE: ======
+#     raise NotImplementedError()
+#     # ========================
+#
