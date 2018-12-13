@@ -75,7 +75,8 @@ class Linear(Block):
         # TODO: Create the weight matrix (w) and bias vector (b).
 
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        self.w = torch.normal(torch.zeros((out_features, in_features)), std=wstd)
+        self.b = torch.ones((1, out_features))
         # ========================
 
         self.dw = torch.zeros_like(self.w)
@@ -100,7 +101,7 @@ class Linear(Block):
         # TODO: Compute the affine transform
 
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        out = x.mm(self.w.transpose(0, 1)) + self.b
         # ========================
 
         self.grad_cache['x'] = x
@@ -119,7 +120,9 @@ class Linear(Block):
         #   - db, the gradient of the loss with respect to b
         # You should accumulate gradients in dw and db.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        dx = dout.mm(self.w)
+        self.dw += dout.transpose(0, 1).mm(x)
+        self.db += dout.sum(0)
         # ========================
 
         return dx
