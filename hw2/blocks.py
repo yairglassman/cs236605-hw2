@@ -75,7 +75,8 @@ class Linear(Block):
         # TODO: Create the weight matrix (w) and bias vector (b).
 
         # ====== YOUR CODE: ======
-        self.w = torch.normal(torch.zeros((out_features, in_features)), std=wstd)
+        matrix = torch.ones((out_features, in_features))
+        self.w = torch.normal(matrix, std=wstd)
         self.b = torch.ones((1, out_features))
         # ========================
 
@@ -209,7 +210,10 @@ class CrossEntropyLoss(Block):
         # Tip: to get a different column from each row of a matrix tensor m,
         # you can index it with m[range(num_rows), list_of_cols].
         # ====== YOUR CODE: ======
-        loss = (-x[range(N), y] + torch.log(torch.exp(x).sum(1))).mean()
+        exp__sum = torch.exp(x).sum(1)
+        log = torch.log(exp__sum)
+        x_y = -x[range(N), y]
+        loss = (x_y + log).mean()
         # ========================
 
         self.grad_cache['x'] = x
@@ -228,11 +232,11 @@ class CrossEntropyLoss(Block):
 
         # TODO: Calculate the gradient w.r.t. the input x
         # ====== YOUR CODE: ======
-        exps = torch.exp(x)
-        exps = exps / exps.sum(1, True)
-        zeros = torch.zeros_like(exps)
+        x_exp = torch.exp(x)
+        x_exp = x_exp / x_exp.sum(1, True)
+        zeros = torch.zeros_like(x_exp)
         zeros[range(N), y] = -1
-        dx = dout * ((exps + zeros) / N)
+        dx = dout * ((x_exp + zeros) / N)
         # ========================
 
         return dx
