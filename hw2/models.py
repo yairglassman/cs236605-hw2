@@ -36,10 +36,13 @@ class MLP(Block):
 
         # TODO: Build the MLP architecture as described.
         # ====== YOUR CODE: ======
-        blocks[0]=Linear(in_features, hidden_features[0])
-        for i in range(0, len(hidden_features)-1):
-            blocks[2*i] = Linear(hidden_features[i], hidden_features[i+1])
-            blocks[2*i+1] = ReLU()
+        blocks.append(Linear(in_features, hidden_features[0]))
+        for i in range(len(hidden_features) - 1):
+            blocks.append(ReLU())
+            blocks.append(Linear(hidden_features[i], hidden_features[i + 1]))
+        blocks.append(ReLU())
+
+        blocks.append(Linear(hidden_features[-1], num_classes))
 
 
         # ========================
@@ -98,10 +101,15 @@ class ConvClassifier(nn.Module):
         # Use only dimension-preserving 3x3 convolutions. Apply 2x2 Max
         # Pooling to reduce dimensions.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
-        layers.append(nn.Conv3d(, , 5))
+
+        layers.append(nn.Conv3d(in_channels, self.filters[0], self.hidden_dims[0] ))
+        for i in range(len(self.hidden_dims) - 1):
+            layers.append(nn.ReLU())
+            layers.append(nn.MaxPool2d(self.pool_every))
+            layers.append(nn.Conv3d(self.filters[i], self.filters[i+1], self.hidden_dims[i+1]))
+
         layers.append(nn.ReLU())
-        layers.appen()
+        layers.append(nn.MaxPool2d(self.pool_every))
         # ========================
         seq = nn.Sequential(*layers)
         return seq
@@ -115,7 +123,15 @@ class ConvClassifier(nn.Module):
         # You'll need to calculate the number of features first.
         # The last Linear layer should have an output dimension of out_classes.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        dim_h=in_h
+        dim_w = in_w
+        for i in range(len(self.hidden_dims)):
+            dim_h=(dim_h-self.hidden_dims[i]+1)/self.pool_every
+            dim_w=(dim_w-self.hidden_dims[i]+1)/self.pool_every
+
+        layers.append(Linear(dim_h*dim_w*self.filters[-1],dim_h*dim_w*self.filters[-1]/2))
+        layers.append(nn.ReLU())
+        layers.append(nn.Linear(dim_h*dim_w*self.filters[-1]/2, self.out_classes))
         # ========================
         seq = nn.Sequential(*layers)
         return seq
@@ -139,6 +155,6 @@ class YourCodeNet(ConvClassifier):
     # For example, add batchnorm, dropout, skip connections, change conv
     # filter sizes etc.
     # ====== YOUR CODE: ======
-    raise NotImplementedError()
+    #raise NotImplementedError()
     # ========================
 
