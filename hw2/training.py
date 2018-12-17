@@ -72,7 +72,28 @@ class Trainer(abc.ABC):
             # - Optional: Implement early stopping. This is a very useful and
             #   simple regularization technique that is highly recommended.
             # ====== YOUR CODE: ======
-            raise NotImplementedError()
+            # yair explain
+            tr_res = self.train_epoch(dl_train, verbose=verbose)
+            for x in tr_res.losses:
+                train_loss += [float(x)]
+
+            train_acc.append(tr_res.accuracy)
+            test_r = self.test_epoch(dl_test, verbose=verbose)
+
+            if checkpoints is not None:
+                if best_acc is None:
+                    best_acc = test_r.accuracy
+                elif best_acc > test_r.accuracy:
+                    torch.save(self.model, checkpoints)
+
+            if early_stopping is not None:
+                if (len(test_loss) > 0) and (min(test_loss) <= min(test_r.losses)):
+                    epochs_without_improvement += 1
+                if epochs_without_improvement == early_stopping:
+                    break
+            for x in test_r.losses:
+                test_loss += [float(x)]
+            test_acc.append(test_r.accuracy)
             # ========================
 
         return FitResult(actual_num_epochs,
@@ -188,7 +209,13 @@ class BlocksTrainer(Trainer):
         # - Optimize params
         # - Calculate number of correct predictions
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        self.optimizer.zero_grad()
+        dout = self.model.forward(X)
+        loss_dout = self.loss_fn(dout, y)
+        loss_grad = self.loss_fn.backward(loss_dout)
+        self.model.backward(loss_grad)
+        self.optimizer.step()
+        loss, num_correct = self.test_batch(batch)
         # ========================
 
         return BatchResult(loss, num_correct)
@@ -200,7 +227,10 @@ class BlocksTrainer(Trainer):
         # - Forward pass
         # - Calculate number of correct predictions
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        dout = self.model.forward(X)
+        loss = self.loss_fn(dout, y)
+        diff = dout.max(dim=1)[1] - y
+        num_correct = (diff.numel() - diff.nonzero().size(0))
         # ========================
 
         return BatchResult(loss, num_correct)

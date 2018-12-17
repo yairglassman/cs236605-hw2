@@ -91,7 +91,8 @@ class MomentumSGD(Optimizer):
 
         # TODO: Add your own initializations as needed.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        self.velocity = [(i, None) for i in range(len(self.params))]
+        self.velocity_iterator = iter(self.velocity)
         # ========================
 
     def step(self):
@@ -103,7 +104,16 @@ class MomentumSGD(Optimizer):
             # update the parameters tensor based on the velocity. Don't forget
             # to include the regularization term.
             # ====== YOUR CODE: ======
-            raise NotImplementedError()
+            vid, velocity = next(self.velocity_iterator, (None, None))
+            if vid is None:
+                self.velocity_iterator = iter(self.velocity)
+                vid, velocity = next(self.velocity_iterator)
+            if velocity is None:
+                velocity = torch.zeros_like(dp)
+            dp += self.reg * p
+            delta = self.momentum * velocity - self.learn_rate * dp
+            self.velocity[vid] = (vid, delta)
+            p += self.velocity[vid][1]
             # ========================
 
 
@@ -124,7 +134,8 @@ class RMSProp(Optimizer):
 
         # TODO: Add your own initializations as needed.
         # ====== YOUR CODE: ======
-        raise NotImplementedError()
+        self.rms = [(i, None) for i in range(len(params))]
+        self.rms_iterator = iter(self.rms)
         # ========================
 
     def step(self):
@@ -137,5 +148,15 @@ class RMSProp(Optimizer):
             # average of it's previous gradients. Use it to update the
             # parameters tensor.
             # ====== YOUR CODE: ======
-            raise NotImplementedError()
+            rms_idx, rms = next(self.rms_iterator, (None, None))
+            if rms_idx is None:
+                self.rms_iterator = iter(self.rms)
+                rms_idx, rms = next(self.rms_iterator)
+            if rms is None:
+                rms = torch.zeros_like(dp)
+            dp += self.reg * p
+            delta = self.decay * rms + (1 - self.decay) * (dp * dp)
+            self.rms[rms_idx] = (rms_idx, delta)
+            mul = torch.rsqrt(self.rms[rms_idx][1] + self.eps).mul(1 / self.learn_rate)
+            p -= mul * dp
             # ========================

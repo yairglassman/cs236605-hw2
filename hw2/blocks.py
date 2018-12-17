@@ -245,96 +245,103 @@ class CrossEntropyLoss(Block):
         return []
 
 
-# class Dropout(Block):
-#     def __init__(self, p=0.5):
-#         super().__init__()
-#         assert 0. <= p <= 1.
-#         self.p = p
-#
-#     def forward(self, x, **kw):
-#         # TODO: Implement the dropout forward pass. Notice that contrary to
-#         # previous blocks, this block behaves differently a according to the
-#         # current mode (train/test).
-#         # ====== YOUR CODE: ======
-#         raise NotImplementedError()
-#         # ========================
-#
-#         return out
-#
-#     def backward(self, dout):
-#         # TODO: Implement the dropout backward pass.
-#         # ====== YOUR CODE: ======
-#         raise NotImplementedError()
-#         # ========================
-#
-#         return dx
-#
-#     def params(self):
-#         return []
-#
-#     def __repr__(self):
-#         return f'Dropout(p={self.p})'
-#
-#
-# class Sequential(Block):
-#     """
-#     A Block that passes input through a sequence of other blocks.
-#     """
-#     def __init__(self, *blocks):
-#         super().__init__()
-#         self.blocks = blocks
-#
-#     def forward(self, x, **kw):
-#         out = None
-#
-#         # TODO: Implement the forward pass by passing each block's output
-#         # as the input of the next.
-#         # ====== YOUR CODE: ======
-#         out = x
-#         for block in self.blocks:
-#             out = block(out, **kw)
-#         # ========================
-#
-#         return out
-#
-#     def backward(self, dout):
-#         din = None
-#
-#         # TODO: Implement the backward pass.
-#         # Each block's input gradient should be the previous block's output
-#         # gradient. Behold the backpropagation algorithm in action!
-#         # ====== YOUR CODE: ======
-#         din = dout
-#         for block in reversed(self.blocks):
-#             din = block.backward(din)
-#         # ========================
-#
-#         return din
-#
-#     def params(self):
-#         params = []
-#
-#         # TODO: Return the parameter tuples from all blocks.
-#         # ====== YOUR CODE: ======
-#         for block in self.blocks:
-#             params.extend(block.params())
-#         # ========================
-#
-#         return params
-#
-#     def train(self, training_mode=True):
-#         for block in self.blocks:
-#             block.train(training_mode)
-#
-#     def __repr__(self):
-#         res = 'Sequential\n'
-#         for i, block in enumerate(self.blocks):
-#             res += f'\t[{i}] {block}\n'
-#         return res
-#
-#     def __len__(self):
-#         return len(self.blocks)
-#
-#     def __getitem__(self, item):
-#         return self.blocks[item]
-#
+class Dropout(Block):
+    def __init__(self, p=0.5):
+        super().__init__()
+        assert 0. <= p <= 1.
+        self.p = p
+
+    def forward(self, x, **kw):
+        # TODO: Implement the dropout forward pass. Notice that contrary to
+        # previous blocks, this block behaves differently a according to the
+        # current mode (train/test).
+        # ====== YOUR CODE: ======
+        if self.training_mode:
+            self.bernoulli = torch.bernoulli(torch.full_like(x, self.p))
+            out = (x * self.bernoulli) / self.p
+        else:
+            out = x
+        # ========================
+
+        return out
+
+    def backward(self, dout):
+        # TODO: Implement the dropout backward pass.
+        # ====== YOUR CODE: ======
+        if self.training_mode:
+            dx = dout * self.bernoulli / self.p
+        else:
+            dx = dout
+        # ========================
+
+        return dx
+
+    def params(self):
+        return []
+
+    def __repr__(self):
+        return f'Dropout(p={self.p})'
+
+
+class Sequential(Block):
+    """
+    A Block that passes input through a sequence of other blocks.
+    """
+    def __init__(self, *blocks):
+        super().__init__()
+        self.blocks = blocks
+
+    def forward(self, x, **kw):
+        out = None
+
+        # TODO: Implement the forward pass by passing each block's output
+        # as the input of the next.
+        # ====== YOUR CODE: ======
+        out = x
+        for block in self.blocks:
+            out = block(out, **kw)
+        # ========================
+
+        return out
+
+    def backward(self, dout):
+        din = None
+
+        # TODO: Implement the backward pass.
+        # Each block's input gradient should be the previous block's output
+        # gradient. Behold the backpropagation algorithm in action!
+        # ====== YOUR CODE: ======
+        din = dout
+        for block in reversed(self.blocks):
+            din = block.backward(din)
+        # ========================
+
+        return din
+
+    def params(self):
+        params = []
+
+        # TODO: Return the parameter tuples from all blocks.
+        # ====== YOUR CODE: ======
+        for block in self.blocks:
+            params.extend(block.params())
+        # ========================
+
+        return params
+
+    def train(self, training_mode=True):
+        for block in self.blocks:
+            block.train(training_mode)
+
+    def __repr__(self):
+        res = 'Sequential\n'
+        for i, block in enumerate(self.blocks):
+            res += f'\t[{i}] {block}\n'
+        return res
+
+    def __len__(self):
+        return len(self.blocks)
+
+    def __getitem__(self, item):
+        return self.blocks[item]
+
