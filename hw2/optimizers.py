@@ -71,8 +71,8 @@ class VanillaSGD(Optimizer):
             # Update the gradient according to regularization and then
             # update the parameters tensor.
             # ====== YOUR CODE: ======
-                dp += self.reg * p
-                p -= (self.learn_rate * dp)
+            dp += self.reg * p
+            p -= (self.learn_rate * dp)
             # ========================
 
 
@@ -104,16 +104,15 @@ class MomentumSGD(Optimizer):
             # update the parameters tensor based on the velocity. Don't forget
             # to include the regularization term.
             # ====== YOUR CODE: ======
-            vid, velocity = next(self.velocity_iterator, (None, None))
-            if vid is None:
+            vel_idx, velocity = next(self.velocity_iterator, (None, None))
+            if vel_idx is None:
                 self.velocity_iterator = iter(self.velocity)
-                vid, velocity = next(self.velocity_iterator)
+                vel_idx, velocity = next(self.velocity_iterator)
             if velocity is None:
                 velocity = torch.zeros_like(dp)
             dp += self.reg * p
-            delta = self.momentum * velocity - self.learn_rate * dp
-            self.velocity[vid] = (vid, delta)
-            p += self.velocity[vid][1]
+            self.velocity[vel_idx] = (vel_idx, self.momentum * velocity - self.learn_rate * dp)
+            p += self.velocity[vel_idx][1]
             # ========================
 
 
@@ -155,8 +154,6 @@ class RMSProp(Optimizer):
             if rms is None:
                 rms = torch.zeros_like(dp)
             dp += self.reg * p
-            delta = self.decay * rms + (1 - self.decay) * (dp * dp)
-            self.rms[rms_idx] = (rms_idx, delta)
-            mul = torch.rsqrt(self.rms[rms_idx][1] + self.eps).mul(1 / self.learn_rate)
-            p -= mul * dp
+            self.rms[rms_idx] = (rms_idx, self.decay * rms + (1 - self.decay) * (dp * dp))
+            p -= torch.rsqrt(self.rms[rms_idx][1] + self.eps).mul(1 / self.learn_rate) * dp
             # ========================

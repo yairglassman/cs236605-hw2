@@ -13,7 +13,7 @@ def part2_overfit_hp():
     wstd, lr, reg = 0, 0, 0
     # TODO: Tweak the hyperparameters until you overfit the small dataset.
     # ====== YOUR CODE: ======
-    wstd, lr, reg = 0, 0.002498, -9.646
+    wstd, lr, reg = 5, 0.0025117, -9.7
     # ========================
     return dict(wstd=wstd, lr=lr, reg=reg)
 

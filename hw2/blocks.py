@@ -75,7 +75,7 @@ class Linear(Block):
         # TODO: Create the weight matrix (w) and bias vector (b).
 
         # ====== YOUR CODE: ======
-        matrix = torch.ones((out_features, in_features))
+        matrix = torch.zeros((out_features, in_features))
         self.w = torch.normal(matrix, std=wstd)
         self.b = torch.ones((1, out_features))
         # ========================
@@ -150,7 +150,8 @@ class ReLU(Block):
         # TODO: Implement the ReLU operation.
         # ====== YOUR CODE: ======
         out = x
-        out.data[out < 0] = 0
+        out.data[x < 0] = 0
+
         # ========================
 
         self.grad_cache['x'] = x
@@ -232,11 +233,10 @@ class CrossEntropyLoss(Block):
 
         # TODO: Calculate the gradient w.r.t. the input x
         # ====== YOUR CODE: ======
-        x_exp = torch.exp(x)
-        x_exp = x_exp / x_exp.sum(1, True)
-        zeros = torch.zeros_like(x_exp)
-        zeros[range(N), y] = -1
-        dx = dout * ((x_exp + zeros) / N)
+        x_exp = torch.exp(x) / torch.exp(x).sum(1, True)
+        m = torch.zeros_like(x_exp)
+        m[range(N), y] = -1
+        dx = dout * ((x_exp + m) / N)
         # ========================
 
         return dx
@@ -297,9 +297,10 @@ class Sequential(Block):
         # TODO: Implement the forward pass by passing each block's output
         # as the input of the next.
         # ====== YOUR CODE: ======
-        out = x
-        for block in self.blocks:
-            out = block(out, **kw)
+        inp = x
+        for b in self.blocks:
+            out = b(inp, **kw)
+            inp = out
         # ========================
 
         return out
@@ -312,8 +313,9 @@ class Sequential(Block):
         # gradient. Behold the backpropagation algorithm in action!
         # ====== YOUR CODE: ======
         din = dout
-        for block in reversed(self.blocks):
-            din = block.backward(din)
+        for b in reversed(self.blocks):
+            dout = b.backward(din)
+            din = dout
         # ========================
 
         return din
@@ -323,8 +325,8 @@ class Sequential(Block):
 
         # TODO: Return the parameter tuples from all blocks.
         # ====== YOUR CODE: ======
-        for block in self.blocks:
-            params.extend(block.params())
+        for b in self.blocks:
+            params.extend(b.params())
         # ========================
 
         return params
