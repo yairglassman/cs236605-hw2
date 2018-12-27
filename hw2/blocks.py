@@ -151,7 +151,6 @@ class ReLU(Block):
         # ====== YOUR CODE: ======
         out = x
         out.data[x < 0] = 0
-
         # ========================
 
         self.grad_cache['x'] = x
@@ -258,7 +257,8 @@ class Dropout(Block):
         # ====== YOUR CODE: ======
         if self.training_mode:
             self.bernoulli = torch.bernoulli(torch.full_like(x, self.p))
-            out = (x * self.bernoulli) / self.p
+            bernoulli_ = (x * self.bernoulli)
+            out = bernoulli_ / self.p
         else:
             out = x
         # ========================
@@ -269,7 +269,8 @@ class Dropout(Block):
         # TODO: Implement the dropout backward pass.
         # ====== YOUR CODE: ======
         if self.training_mode:
-            dx = dout * self.bernoulli / self.p
+            bernoulli = dout * self.bernoulli
+            dx = bernoulli / self.p
         else:
             dx = dout
         # ========================
