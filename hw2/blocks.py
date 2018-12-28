@@ -258,6 +258,7 @@ class Dropout(Block):
         if self.training_mode:
             self.bernoulli = torch.bernoulli(torch.full_like(x, self.p))
             bernoulli_ = (x * self.bernoulli)
+
             out = bernoulli_ / self.p
         else:
             out = x
