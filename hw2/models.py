@@ -109,7 +109,7 @@ class ConvClassifier(nn.Module):
             else:
                 pool += 1
             layers.append(nn.Conv2d(self.filters[i], self.filters[i + 1], padding=1, kernel_size=3, stride=1))
-
+            #layers.append(nn.BatchNorm2d(self.filters[i]))
         layers.append(nn.ReLU())
         if pool == self.pool_every - 1:
             layers.append(nn.MaxPool2d(2))
@@ -153,14 +153,57 @@ class ConvClassifier(nn.Module):
         return out
 
 
-    # class YourCodeNet(ConvClassifier):
-    #     def __init__(self, in_size, out_classes, filters, pool_every, hidden_dims):
-    #         super().__init__(in_size, out_classes, filters, pool_every, hidden_dims)
+class YourCodeNet(ConvClassifier):
+    def __init__(self, in_size, out_classes, filters, pool_every, hidden_dims):
+             super().__init__(in_size, out_classes, filters, pool_every, hidden_dims)
 
         # TODO: Change whatever you want about the ConvClassifier to try to
         # improve it's results on CIFAR-10.
         # For example, add batchnorm, dropout, skip connections, change conv
-        # filter sizes etc.
+       # filter sizes etc.
         # ====== YOUR CODE: ======
-        # raise NotImplementedError()
+
+    def _make_feature_extractor(self):
+                in_channels, in_h, in_w, = tuple(self.in_size)
+                layers = []
+                pool = 0
+                layers.append(nn.Conv2d(in_channels, self.filters[0], kernel_size=3, padding=1))
+                layers.append(nn.BatchNorm2d(self.filters[0]))
+
+                for i in range(len(self.filters) - 1):
+                    layers.append(nn.ReLU(inplace=True))
+                    if pool == self.pool_every - 1:
+                        layers.append(nn.MaxPool2d(kernel_size=2, stride=2))
+                        pool = 0
+                    else:
+                        pool += 1
+                    layers.append(nn.Conv2d(self.filters[i], self.filters[i + 1], padding=1, kernel_size=3, stride=1))
+                    layers.append(nn.BatchNorm2d(self.filters[i + 1]))
+
+                layers.append(nn.ReLU(inplace=True))
+                if pool == self.pool_every - 1:
+                    layers.append(nn.MaxPool2d(kernel_size=2, stride=2))
+
+                seq = nn.Sequential(*layers)
+                return seq
+
+    def _make_classifier(self):
+                in_channels, in_h, in_w, = tuple(self.in_size)
+                layers = []
+                dim_h = in_h
+                dim_w = in_w
+                for i in range(len(self.filters) // self.pool_every):
+                    dim_h = dim_h // 2
+                    dim_w = dim_w // 2
+
+                layers.append(nn.Linear(dim_h * dim_w * self.filters[-1], self.hidden_dims[0]))
+                for i in range(len(self.hidden_dims) - 1):
+                    layers.append(nn.ReLU())
+                    layers.append(nn.Linear(self.hidden_dims[i], self.hidden_dims[i + 1]))
+                layers.append(nn.ReLU())
+                layers.append(nn.Linear(self.hidden_dims[-1], self.out_classes))
+
+                seq = nn.Sequential(*layers)
+
+                return seq
         # ========================

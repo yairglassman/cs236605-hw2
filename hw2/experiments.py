@@ -16,6 +16,7 @@ from . import models
 from . import training
 
 DATA_DIR = os.path.join(os.getenv('HOME'), '.pytorch-datasets')
+#DATA_DIR = os.path.join(r"C:\Users\Martina\Desktop\Secondo anno-Primo semestre\Deep Learning on Computational Accelerators\hw2", '.pytorch-datasets')
 
 
 def run_experiment(run_name, out_dir='./results', seed=None,
@@ -54,9 +55,21 @@ def run_experiment(run_name, out_dir='./results', seed=None,
     # - Run training and save the FitResults in the fit_res variable.
     # - The fit results and all the experiment parameters will then be saved
     #  for you automatically.
-    fit_res = None
-    # ====== YOUR CODE: ======
-    raise NotImplementedError()
+    filters = [val for val in filters_per_layer for _ in range(layers_per_block)]
+    x0, _ = ds_train[0]
+    in_size = x0.shape
+    num_classes = 10
+
+    model = model_cls(in_size, num_classes, filters, pool_every, hidden_dims)
+    loss_fn = torch.nn.CrossEntropyLoss()
+    optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=0.9)
+    print(model)
+
+    trainer = training.TorchTrainer(model, loss_fn, optimizer, device)
+
+    dl_train = torch.utils.data.DataLoader(ds_train, bs_train, shuffle=False)
+    dl_test = torch.utils.data.DataLoader(ds_test, bs_test if bs_test else bs_train // 2, shuffle=False)
+    fit_res = trainer.fit(dl_train, dl_test, num_epochs=epochs, early_stopping=early_stopping)
     # ========================
 
     save_experiment(run_name, out_dir, cfg, fit_res)

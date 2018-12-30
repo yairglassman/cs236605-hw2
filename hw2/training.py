@@ -73,7 +73,7 @@ class Trainer(abc.ABC):
             # ====== YOUR CODE: ======
             train_res = self.train_epoch(dl_train, verbose=verbose)
             train_acc.append(train_res.accuracy)
-            train_loss += [float(x) for x in train_res.losses]
+            train_loss.append(sum(train_res.losses)/len(train_res.losses))
 
             test_res = self.test_epoch(dl_test, verbose=verbose)
 
@@ -91,7 +91,7 @@ class Trainer(abc.ABC):
                     break
 
             test_acc.append(test_res.accuracy)
-            test_loss += [float(x) for x in test_res.losses]
+            test_loss.append(sum(train_res.losses)/len(train_res.losses))
             # ========================
 
         return FitResult(actual_num_epochs,
