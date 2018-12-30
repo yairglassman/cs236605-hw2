@@ -43,6 +43,14 @@ def part2_dropout_hp():
 part2_q1 = r"""
 **Your answer:**
 
+Unfortunately, we have different results than the results we thought we will have.
+we thought that when we will use the dropout we will have better results.
+Maybe due to the randomness of choosing the neurons to turn off, the model is getting really slow 
+so we can't see the improve in 30 epochs.
+but we think that in this way we get more redundancy to the model so yield can get better - but we need more epochs,
+because its so slow.
+"
+
 
 Write your answer using **markdown** and $\LaTeX$:
 ```python
@@ -56,7 +64,13 @@ An equation: $e^{i\pi} -1 = 0$
 part2_q2 = r"""
 **Your answer:**
 
-
+increasing of the test loss is possible when training with the cross-entropy loss function.
+the reason is the connection between total loss to the accuracy.
+the total loss is actually the mean - of the loss func to every one of the classes,
+and the accuracy is based on the class that have the top score.
+so there is a chance that the top score is for the right class, but for other class that are'nt correct the loss function increase
+and than we dill with higher accuracy, and higher total loss. 
+  
 Write your answer using **markdown** and $\LaTeX$:
 ```python
 # A code block
@@ -86,7 +100,11 @@ An equation: $e^{i\pi} -1 = 0$
 part3_q2 = r"""
 **Your answer:**
 
+we didn't succeeded to train in this network.
+the problem we got is that the dipper we get, we getting more filters, and it need to be the other way around.
+i.e when we get down the layers we use the filters to make features and than we cam reduce the space in the next step.
 
+"""
 Write your answer using **markdown** and $\LaTeX$:
 ```python
 # A code block
